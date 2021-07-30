@@ -1,5 +1,6 @@
-package springSecurity.myPage.config;
+package ex2.ex2.config;
 
+import ex2.ex2.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,19 +10,16 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import springSecurity.myPage.service.MemberService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
-
     private final MemberService memberService;
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
@@ -32,23 +30,18 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        /**
-         * admin : /admin/~
-         * user : /user/info
-         * 나머진 권한필요 X
-         */
-        http.
-                authorizeRequests()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
+        http
+                .authorizeRequests()
+                        .antMatchers("/admin").hasRole("ADMIN")
                     .antMatchers("/user/info").hasRole("USER")
                     .antMatchers("/**").permitAll()
-                .and() //로그인 설정
-                    .formLogin()
-                    .loginPage("/user/login") //custom login
+                .and()
+                        .formLogin()
+                    .loginPage("/user/login")
                     .defaultSuccessUrl("/user/login/result")
                     .permitAll()
                 .and()
-                    .logout()
+                        .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
                     .logoutSuccessUrl("/user/logout/result")
                     .invalidateHttpSession(true)
